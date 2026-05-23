@@ -1,0 +1,216 @@
+---
+title: "Procedimentos adotados pelo Grupo 1 na análise de dados"
+authors: " 
+RAFAEL BOTH RICHINITTI <br> LUCAS LIXINSKI ARNHOLD <br> FRANCISCO DA SILVA PEDROSO <br> GABRIELA GAMPE BONNESS <br> HELOISA GIOVANELLA <br> NATALIA HORST BITENCOURT   <br> LUCAS DA SILVEIRA OLIVEIRA <br> FELIPE WERNER SAMUEL"
+date: "2026-05-13"
+lang: pt-BR
+format:
+  html:
+    output-dir: docs
+    toc: true
+    toc-location: left
+    toc-title: "Sumário"
+    include-in-header:
+      - text: |
+          <style>
+          /* Justificar o título do documento */
+          .title {
+            text-align: justify;
+          }
+          
+          /* Estilização do Índice (Quadro/Tabela) */
+          #TOC {
+            border: 1px solid #adb5bd;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px; /* Espaço para a imagem abaixo */
+          }
+          
+          #TOC .toc-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+          }
+
+          #TOC ul { padding-left: 0; list-style: none; }
+          
+          /* Divisórias entre os itens */
+          #TOC li {
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+          }
+          #TOC li:last-child { border-bottom: none; }
+          
+          /* Estilo específico para a imagem fora do sumário */
+          .logo-abaixo-toc {
+            width: 90%;
+            display: block;
+            margin-top: 10px; /* Distância do quadro do sumário */
+          }
+          </style>
+    include-after-body:
+      - text: |
+          <script>
+          document.addEventListener("DOMContentLoaded", function() {
+            var toc = document.querySelector("#TOC");
+            if (toc) {
+              var img = document.createElement("img");
+              img.src = "https://www.ufrgs.br/politica/wp-content/uploads/2021/12/logo.svg";
+              img.className = "logo-abaixo-toc"; // Aplica o estilo CSS criado acima
+              
+              // Insere a imagem LOGO APÓS o elemento do Sumário
+              toc.insertAdjacentElement('afterend', img);
+            }
+          });
+          </script>
+---
+
+  
+# Códigos utilizados no trabalho final da disciplina CPP84  
+  
+  
+## 1. Seleção das bases de dados  
+
+As bases de dados escolhidas para o trabalho foram as seguintes:
+
+* Agosto/2014 - DATAFOLHA (Registro 03832 no site do Cesop)  
+* Agosto/2018 - IBOPE (Registro 04531 no site do Cesop)  
+* Setembro/2018 - IBOPE (Registro 04535 no site do Cesop)  
+* Agosto/2022 - IPEC (Registro 04924 no site do Cesop)  
+* Setembro/2022 - IPEC (Registro 04928 no site do Cesop)  
+
+Os critérios para a escolha das bases de dados foram os seguintes:  
+  
+1. Os dados estavam disponíveis para download no site do Cesop, o que é importante para a transparência e reprodutibilidade do trabalho.  
+2. As pesquisas continham informações a respeito da intenção de voto no Rio Grande do Sul;  
+3. As pesquisas foram realizadas no mesmo período (agosto/setembro) dos anos escolhidos;  
+4. Embora realizados por institutos de pesquisa diferentes, os questionários eram semelhantes e, no caso do IBOPE, as perguntas eram idênticas às do IPEC, o que permitiu uma melhor comparação entre os resultados;  
+5. As pesquisas continham perguntas espontâneas a respeito da intenção de voto, o que ajudava a indicar com mais precisão quem eram os respondentes indecisos, diferentemente de pesquisas que só tinham perguntas estimuladas, onde os indecisos poderiam ser confundidos com aqueles que não tinham intenção de votar em nenhum dos candidatos.  
+  
+Entre as limitações, destaca-se que:  
+  
+1. As pesquisas foram realizadas por institutos de pesquisa diferentes, o que pode ter influenciado os resultados;  
+2.  Não foi feita uma análise longitudinal detalhada de cada uma das pesquisas disponíveis, pois não foram analisadas todas as pesquisas disponíveis no site do Cesop devido a uma limitação no número de downloads permitidos (máximo de oito downloads).  
+  
+
+## 2. Importação dos dados:    
+  
+Esta parte do trabalho foi realizada com auxílio da ferramenta de inteligência artificial Positron Assistant, utilizando o modelo Claude Sonnet 4.5.  
+  
+Os pacotes carregados foram:
+
+```{r pacotes, warning = FALSE, message = FALSE}
+library(dplyr)      # Para a função filter() e operador pipe |>
+library(haven)      # Para ler arquivos .SAV (read_sav) baixados do site do Cesop
+```
+
+  
+  
+Os dados foram importados para o Positron utilizando a função `` read_sav ``.  
+  
+Dessa forma, a importação seguiu o seguinte padrão para cada uma das cinco bases:  
+  
+`` caminho_arquivo1 <- "/caminho até o arquivo.SAV"``  
+``dadosmêsano <- read_sav(caminho_arquivo1)``
+  
+
+```{r, include = FALSE}
+caminho_arquivo1 <- "/Users/macbookair/Downloads/Trabalho Eleições/04928/04928.SAV"
+dadosset22 <- read_sav(caminho_arquivo1)
+
+caminho_arquivo2 <- "/Users/macbookair/Downloads/Trabalho Eleições/04924/04924.SAV"
+dadosago22 <- read_sav(caminho_arquivo2)
+
+caminho_arquivo3 <- "/Users/macbookair/Downloads/Trabalho Eleições/04535/04535.SAV"
+dadosset18 <- read_sav(caminho_arquivo3)
+
+caminho_arquivo4 <- "/Users/macbookair/Downloads/Trabalho Eleições/04531/04531.SAV"
+dadosago18 <- read_sav(caminho_arquivo4)
+
+caminho_arquivo5 <- "/Users/macbookair/Downloads/Trabalho Eleições/03832/03832.SAV"
+dadosago14 <- read_sav(caminho_arquivo5)
+```
+
+  
+Logo após o processo de importação, foi feita uma rápida visualização a respeito da natureza dos dados:  
+
+```{r visualização, warning = FALSE, message = FALSE}
+head(dadosago14)
+```
+
+  
+Este processo foi repetido com todas os *dataframes*.    
+
+  
+  
+## 3. Análise dos dados dos indecisos:  
+
+  
+As observações foram selecionadas utilizando linguagem R no software *Positron*, versão 2026.04.1.
+
+A limpeza dos dados envolveu a seleção das observações dos eleitores indecisos. A seleção dos indecisos baseou-se nas respostas para as seguintes perguntas:  
+  
+1. Pergunta (p1a): Em outubro também haverá eleição para governador do estado do Rio Grande do Sul. Em quem você pretende votar para governador do Rio Grande do Sul?  
+Instituto:  
+DATAFOLHA (Registro 03832 no site do Cesop)  
+  
+Respostas selecionadas:  
+* 96 - Em branco / nulo / nenhum  
+* 99 - Não sabe  
+  
+  
+2. Pergunta (P02): Se a eleição para GOVERNADOR fosse hoje, em quem o(a) sr(a) votaria para Governador do RIO GRANDE DO SUL?   
+Institutos:  
+IBOPE (Registro 04531 no site do Cesop)  
+IBOPE (Registro 04535 no site do Cesop)  
+IPEC (Registro 04924 no site do Cesop)  
+IPEC (Registro 04928 no site do Cesop)  
+  
+Respostas selecionadas:  
+* 97 - Ninguém / Nenhum / Branco / Nulo  
+* 98 - Não sabe  
+* 99 - Não respondeu  
+  
+  
+Em seguida, foi enviado o seguinte comando para o Positron Assistant:  
+"Realize esta tarefa considerando os 5 objetos presentes nos dados da seção. Nos dadosago14, devem ser selecionadas apenas as observações que tem como resposta 96 ou 99 da variável 'p1a'. Nos dadosago18, dadosset18, dadosago22, dadosset22, devem ser selecionadas apenas as respostas 97, 98 e 99 da variável 'P02'". 
+  
+O resultado gerado foi:  
+```{r filtros aplicados}
+# Filtrar dadosago14: apenas observações com p1a = 96 ou 99
+dadosago14_filtrado <- dadosago14 |>
+  filter(p1a %in% c(96, 99))
+
+# Filtrar dadosago18: apenas observações com P02 = 97, 98 ou 99
+dadosago18_filtrado <- dadosago18 |>
+  filter(P02 %in% c(97, 98, 99))
+
+# Filtrar dadosset18: apenas observações com P02 = 97, 98 ou 99
+dadosset18_filtrado <- dadosset18 |>
+  filter(P02 %in% c(97, 98, 99))
+
+# Filtrar dadosago22: apenas observações com P02 = 97, 98 ou 99
+dadosago22_filtrado <- dadosago22 |>
+  filter(P02 %in% c(97, 98, 99))
+
+# Filtrar dadosset22: apenas observações com P02 = 97, 98 ou 99
+dadosset22_filtrado <- dadosset22 |>
+  filter(P02 %in% c(97, 98, 99))
+```
+
+  
+Após a filtragem, obtiveram-se os seguintes números de indecisos:  
+* dadosago14_filtrado: 820 observações (66,5% do total)  
+* dadosago18_filtrado: 836 observações (82,9% do total)  
+* dadosset18_filtrado: 938 observações (51,9% do total)  
+* dadosago22_filtrado: 722 observações (71,6% do total)  
+* dadosset22_filtrado: 678 observações (37,5% do total)  
+  
+  
+  
+A partir desta seleção de respostas, o banco de dados passou a ter apenas as respostas dos eleitores indecisos. Os *dataframes* passaram a ter os seguintes nomes: dadosago14 (do registro Cesop 03832), dadosago18 (do registro Cesop 04531), dadosset18 (do registro Cesop 04535), dadosago22 (do registro Cesop 04924), dadosset22 (do registro Cesop 04928). Assim, partiu-se para a análise de diversas características destes respondentes, fundamental para os objetivos do trabalho.
